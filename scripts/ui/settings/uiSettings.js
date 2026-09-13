@@ -40,7 +40,7 @@ const DEFAULT_ORDER = MAIN_MENU_ITEMS.map((item) => item.id);
 
 function readSavedData(player) {
   try {
-    const raw = player.getDynamicProperty(SETTINGS_DYNAMIC_PROPERTY_KEY);
+    const raw = Database.get(player, SETTINGS_DYNAMIC_PROPERTY_KEY);
     if (typeof raw !== "string") return null;
     const parsed = JSON.parse(raw);
     if (!parsed || typeof parsed !== "object" || !Array.isArray(parsed.order)) return null;
@@ -68,7 +68,7 @@ function getSavedOrder(player) {
 
 function saveOrder(player, order) {
   if (!player?.isValid) return;
-  player.setDynamicProperty(SETTINGS_DYNAMIC_PROPERTY_KEY, JSON.stringify({ saved: true, order }));
+  Database.set(player, SETTINGS_DYNAMIC_PROPERTY_KEY, JSON.stringify({ saved: true, order }));
 }
 
 /* =========================

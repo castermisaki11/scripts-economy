@@ -143,7 +143,7 @@ function persistPlayerState(player, playerMap) {
   }
 
   try {
-    player.setDynamicProperty(BUFF_DYNAMIC_PROPERTY_KEY, JSON.stringify(out));
+    Database.set(player, BUFF_DYNAMIC_PROPERTY_KEY, JSON.stringify(out));
   } catch {
     // dynamic property เกินขนาดที่อนุญาต หรือ player ไม่ valid แล้ว —
     // ปล่อยผ่าน ครั้งถัดไปที่ state เปลี่ยนจะพยายามเขียนใหม่อีกครั้ง
@@ -158,7 +158,7 @@ function ensurePlayerStateLoaded(player) {
   if (!player?.isValid || loadedFromStorage.has(player.id)) return;
   loadedFromStorage.add(player.id);
 
-  const raw = player.getDynamicProperty(BUFF_DYNAMIC_PROPERTY_KEY);
+    const raw = Database.get(player, BUFF_DYNAMIC_PROPERTY_KEY);
   if (typeof raw !== "string") return;
 
   const restored = deserializePlayerState(raw, system.currentTick);
@@ -332,7 +332,7 @@ export function purgeAllBuffs(player) {
   playerBuffs.delete(player.id);
   loadedFromStorage.delete(player.id);
   try {
-    if (player.isValid) player.setDynamicProperty(BUFF_DYNAMIC_PROPERTY_KEY, undefined);
+    if (player.isValid) Database.set(player, BUFF_DYNAMIC_PROPERTY_KEY, undefined);
   } catch {
     // player ไม่ valid แล้ว (เช่นระหว่าง afterEvents.playerLeave) — ปล่อยผ่าน
   }

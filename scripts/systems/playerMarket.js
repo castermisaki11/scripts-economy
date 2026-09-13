@@ -23,11 +23,11 @@
 // แก้ไขจากของเดิมแม้แต่บรรทัดเดียว — ย้ายที่อยู่ไฟล์เท่านั้น
 // =========================
 
-import { world, ItemStack, EnchantmentType } from "@minecraft/server";
+import { findOnlinePlayerByName, findOnlinePlayerById, findOnlinePlayerByIdOrName } from "../core/playerUtils";
 import { t } from "../ui/locale/index";
 import { showSuccess } from "../core/messageUtils";
 import { giveItems } from "../core/itemUtils";
-import { BANK_DYNAMIC_PROPERTY_KEY } from "../core/constants";
+import { getBankBalance, depositToBank, withdrawFromBank } from "../core/economyUtils";
 import { nowMs, daysBetweenBangkok } from "../core/timeUtils";
 import { SHOP_CONFIG } from "../config/shopConfig";
 import { searchItems } from "../ui/framework/SearchService";
@@ -221,28 +221,23 @@ export const clearPendingQuestMarketSales = (player) => {
 // ดู addPendingQuestMarketSale ด้านบน) เหมือน notifySellerOfSale() ด้านล่าง
 // แต่คืน Player object กลับมาแทนที่จะแจ้งข้อความเลย เพราะผู้เรียกใหม่นี้
 // (marketUi.js confirmPurchase) ต้องใช้ผลลัพธ์ตัดสินใจต่อ ไม่ใช่แค่โชว์ข้อความ
-export function findOnlinePlayerByName(name) {
-    return world.getPlayers().find(p => p.name === name) ?? null;
-}
-export function findOnlinePlayerById(id) {
-    return world.getPlayers().find(p => p.id === id) ?? null;
-}
+// Player lookup now delegated to core/playerUtils
+// findOnlinePlayerByName, findOnlinePlayerById, findOnlinePlayerByIdOrName are imported above.
+
 function findSellerPlayer(listing) {
-    if (listing.sellerId) {
-        const byId = findOnlinePlayerById(listing.sellerId);
-        if (byId) return byId;
-    }
-    return findOnlinePlayerByName(listing.seller);
+  // Use id-or-name helper for convenience
+  return findOnlinePlayerByIdOrName(listing.sellerId ?? listing.seller);
 }
 
-// --- ระบบธนาคารกลาง (ภาษี) ---
-export const getBankBalance = () => world.getDynamicProperty(BANK_KEY) || 0;
+// Strategy: use core/economyUtils for bank operations – keep compatibility wrapper if needed
+
 export const addBankBalance = (amount) => {
-    const current = getBankBalance();
-    world.setDynamicProperty(BANK_KEY, current + amount);
+  // Delegate to core/economyUtils
+  depositToBank(amount);
 };
 export const clearBankBalance = () => {
-    world.setDynamicProperty(BANK_KEY, 0);
+  // Reset bank via core/economyUtils
+  withdrawFromBank(getBankBalance());
 };
 
 export function playSound(player, soundName) {
@@ -367,7 +362,7 @@ export function notifyWatchers(listing) {
     const ids = world.getDynamicPropertyIds().filter(id => id.startsWith(WATCH_KEY_PREFIX));
     for (const id of ids) {
         const watcherId = id.slice(WATCH_KEY_PREFIX.length);
-        const watcher = world.getPlayers().find(p => p.id === watcherId) ?? world.getPlayers().find(p => p.name === watcherId);
+        const watcher = findOnlinePlayerById(watcherId) ?? findOnlinePlayerByName(watcherId);
         if (listing.sellerId && watcher?.id === listing.sellerId) continue;
         if (!listing.sellerId && watcher?.name === listing.seller) continue;
         if (!watcher && watcherId === (listing.sellerId ?? listing.seller)) continue;

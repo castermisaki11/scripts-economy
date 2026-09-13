@@ -86,7 +86,7 @@ export function readData(player) {
   let result = defaultData;
 
   try {
-    const raw = player.getDynamicProperty(SHOP_UNLOCKS_KEY);
+    const raw = Database.get(player, SHOP_UNLOCKS_KEY);
     if (typeof raw === "string") {
       const parsed = JSON.parse(raw);
       const rights = Array.isArray(parsed.rights)
@@ -112,7 +112,7 @@ export function readData(player) {
         const compressed = JSON.parse(backupRaw);
         const restored = decompressData(compressed);
         if (restored.rights.length > 0 || restored.unlocked.length > 0) {
-          player.setDynamicProperty(SHOP_UNLOCKS_KEY, JSON.stringify(restored));
+          Database.set(player, SHOP_UNLOCKS_KEY, JSON.stringify(restored));
           result = restored;
         }
       }
@@ -130,7 +130,7 @@ export function readData(player) {
  * พร้อม mirror ไป world backup (per-player key, compressed)
  */
 function saveData(player, data) {
-  player.setDynamicProperty(SHOP_UNLOCKS_KEY, JSON.stringify(data));
+    Database.set(player, SHOP_UNLOCKS_KEY, JSON.stringify(data));
   readDataCache.delete(player.id);
 
   // Mirror ไป world backup (per-player key)

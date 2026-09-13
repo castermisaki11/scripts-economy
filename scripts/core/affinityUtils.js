@@ -38,7 +38,7 @@ function defaultAfkData() {
  */
 export function getAffinityData(player) {
   try {
-    const raw = player.getDynamicProperty(DATA_KEY);
+    const raw = Database.get(player, DATA_KEY);
     if (typeof raw === "string") {
       const parsed = JSON.parse(raw);
       if (parsed && parsed.weapon && parsed.armor) return parsed;
@@ -51,7 +51,7 @@ export function getAffinityData(player) {
  * เซฟข้อมูล affinity ทั้งหมด
  */
 export function setAffinityData(player, data) {
-  player.setDynamicProperty(DATA_KEY, JSON.stringify(data));
+  Database.set(player, DATA_KEY, JSON.stringify(data));
 }
 
 /**
@@ -145,7 +145,7 @@ export function getAffinityProgress(player, type, category) {
  */
 export function recordAffinityHit(player, category, entityId) {
   try {
-    const raw = player.getDynamicProperty(AFK_KEY);
+    const raw = Database.get(player, AFK_KEY);
     let afk = typeof raw === "string" ? JSON.parse(raw) : defaultAfkData();
     const now = Date.now();
 
@@ -157,7 +157,7 @@ export function recordAffinityHit(player, category, entityId) {
       afk.hits = afk.hits.slice(-AFFINITY_CONFIG.ANTI_FARM.maxTrackEntities);
     }
 
-    player.setDynamicProperty(AFK_KEY, JSON.stringify(afk));
+    Database.set(player, AFK_KEY, JSON.stringify(afk));
   } catch {}
 }
 
@@ -167,7 +167,7 @@ export function recordAffinityHit(player, category, entityId) {
  */
 export function getAntiFarmMultiplier(player, category, entityId) {
   try {
-    const raw = player.getDynamicProperty(AFK_KEY);
+    const raw = Database.get(player, AFK_KEY);
     if (!raw) return { multiplier: 1, shouldSkip: false };
     const afk = JSON.parse(raw);
     const now = Date.now();
@@ -198,7 +198,7 @@ export function getAntiFarmMultiplier(player, category, entityId) {
  */
 export function getAffinityCooldownRemaining(player, category) {
   try {
-    const raw = player.getDynamicProperty(AFK_KEY);
+    const raw = Database.get(player, AFK_KEY);
     if (!raw) return 0;
     const afk = JSON.parse(raw);
     const now = Date.now();
@@ -217,9 +217,7 @@ export function getAffinityCooldownRemaining(player, category) {
 /**
  * ลบ anti-farming data ของผู้เล่น (ใช้ตอน migrate)
  */
-export function clearAfkData(player) {
-  player.setDynamicProperty(AFK_KEY, JSON.stringify(defaultAfkData()));
-}
+export function clearAfkData(player) { Database.set(player, AFK_KEY, JSON.stringify(defaultAfkData())); }
 
 // =========================
 // STAT GROWTH CALCULATION

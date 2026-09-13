@@ -63,6 +63,7 @@ import { showError, showInfo, showActionBar } from "../core/messageUtils";
 import { isValidPlayer, isSameDimension, distanceBetween } from "../core/playerUtils";
 import { TICKS_PER_SECOND } from "../core/constants";
 import { ECONOMY_CONFIG } from "../config/economyConfig";
+import { safeAsync } from "../core/asyncUtils";
 import { subscribeSafe } from "../core/eventGuard";
 
 /* =========================
@@ -141,14 +142,14 @@ function isInCombat(entityId) {
 // เพื่อให้ undefined (ยังไม่เคยตั้งค่า) แปลว่า "เปิดใช้งานป้องกัน" เป็นค่า
 // default เหมือนกับรูปแบบของ tpDisabled ด้านล่าง
 function isCombatBlockEnabled(player) {
-  return player.getDynamicProperty("tpCombatBlockDisabled") !== true;
+  return Database.get(player, "tpCombatBlockDisabled") !== true;
 }
 
 function toggleCombatBlock(player) {
-  const disabled = player.getDynamicProperty("tpCombatBlockDisabled") === true;
-  player.setDynamicProperty("tpCombatBlockDisabled", !disabled);
+  const disabled = Database.get(player, "tpCombatBlockDisabled") === true;
+  Database.set(player, "tpCombatBlockDisabled", !disabled);
 
-  const msg = !disabled ? t("tp.combatBlockDisabledMessage") : t("tp.combatBlockEnabledMessage");
+  const msg = !disabled ? t("tp.combatBlockDisabledMessage") : t("tp.commitBlockEnabledMessage");
   showActionBar(player, msg, "tpBank");
   player.playSound("random.orb");
 }
@@ -172,7 +173,7 @@ subscribeSafe(["entityHurt"], ({ hurtEntity, damageSource }) => {
 
 // ยกเลิก channel ที่กำลังนับถอยหลังอยู่ — คืนเงินเต็มจำนวนให้ผู้ส่งเสมอ
 // (channel ถูกสร้างหลังหักเงินไปแล้วตอนกดยอมรับ ดู acceptTp())
-function cancelChannel(sender, reasonMessageKey, notifyTargetKey) {
+export const cancelChannel = safeAsync(async (sender, reasonMessageKey, notifyTargetKey) => {
   const channel = activeChannels.get(sender.id);
   if (!channel) return;
 
@@ -189,7 +190,7 @@ function cancelChannel(sender, reasonMessageKey, notifyTargetKey) {
   }
 
   if (notifyTargetKey) {
-    const target = world.getPlayers().find(p => p.id === channel.targetId);
+    const target = findOnlinePlayerById(channel.targetId);
     if (target?.isValid) showInfo(target, t(notifyTargetKey, { sender: sender.name ?? "?" }));
   }
 }
@@ -304,12 +305,12 @@ function finishTeleport(sender, target, cost) {
 /* =========================
    EXPORT MAIN UI
 ========================= */
-export async function openTpUI(player) {
+export const openTpUI = safeAsync(async (player) => {
   if (!player?.isValid) return;
 
   const players = world.getPlayers().filter(p => p.id !== player.id);
   const money = getMoney(player);
-  const isDisabled = player.getDynamicProperty("tpDisabled");
+  const isDisabled = Database.get(player, "tpDisabled");
   const isCombatBlockOff = !isCombatBlockEnabled(player);
 
   const items = [
@@ -365,8 +366,8 @@ export async function openTpUI(player) {
    TOGGLE TP RECEIVE
 ========================= */
 function toggleTp(player) {
-  const state = player.getDynamicProperty("tpDisabled");
-  player.setDynamicProperty("tpDisabled", !state);
+    const state = Database.get(player, "tpDisabled");
+    Database.set(player, "tpDisabled", !state);
 
   const msg = !state ? t("tp.toggleDisabledMessage") : t("tp.toggleEnabledMessage");
   showActionBar(player, msg, "tpBank");
@@ -376,7 +377,7 @@ function toggleTp(player) {
 /* =========================
    CONFIRM + BREAKDOWN
 ========================= */
-export async function openTpConfirmUI(sender, target) {
+export const openTpConfirmUI = safeAsync(async (sender, target) => {
   if (!sender?.isValid) return;
 
   if (target.getDynamicProperty("tpDisabled")) {
@@ -473,8 +474,8 @@ function sendTpRequest(sender, target, cost) {
 
     tpRequests.delete(target.id);
 
-    const stillSender = world.getPlayers().find(p => p.id === sender.id);
-    const stillTarget = world.getPlayers().find(p => p.id === target.id);
+    const stillSender = findOnlinePlayerById(sender.id);
+    const stillTarget = findOnlinePlayerById(target.id);
 
     if (stillSender) showError(stillSender, t("tp.requestTimeoutSender", { target: target.name }));
     if (stillTarget) showError(stillTarget, t("tp.requestTimeoutTarget", { sender: sender.name }));
@@ -490,7 +491,7 @@ function sendTpRequest(sender, target, cost) {
 /* =========================
    RECEIVE UI
 ========================= */
-async function openReceiveUI(target) {
+export const openReceiveUI = safeAsync(async (target) => {
   if (!target?.isValid) return;
 
   const req = tpRequests.get(target.id);
@@ -518,7 +519,7 @@ function rejectTp(target) {
   const req = tpRequests.get(target.id);
   if (!req) return;
 
-  const sender = world.getPlayers().find(p => p.id === req.senderId);
+    const sender = findOnlinePlayerById(req.senderId);
   if (sender) showError(sender, t("tp.rejectedMessage", { target: target.name }));
   tpRequests.delete(target.id);
 }
@@ -543,7 +544,7 @@ export function acceptTp(target) {
     return;
   }
 
-  const sender = world.getPlayers().find(p => p.id === req.senderId);
+    const sender = findOnlinePlayerById(req.senderId);
   if (!sender) {
     showError(target, t("tp.senderGoneMessage"));
     tpRequests.delete(target.id);

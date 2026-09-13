@@ -63,7 +63,7 @@ export const STAT_GROUP = {
 };
 
 function getNumber(player, key) {
-  const raw = player.getDynamicProperty(key);
+  const raw = Database.get(player, key);
   return typeof raw === "number" ? raw : 0;
 }
 
@@ -89,40 +89,40 @@ export function getExp(player) { return getNumber(player, KEY.exp); }
 
 /** คลาสปัจจุบัน ("warrior"/"archer"/"adventurer") — null ถ้ายังไม่เคยเลือก */
 export function getPlayerClass(player) {
-  const raw = player.getDynamicProperty(KEY.playerClass);
+  const raw = Database.get(player, KEY.playerClass);
   return typeof raw === "string" && STAT_CONFIG.CLASS.CLASSES[raw] ? raw : null;
 }
 
-export function setStrAtk(player, value) { player.setDynamicProperty(KEY.strAtk, value); }
-export function setStrProj(player, value) { player.setDynamicProperty(KEY.strProj, value); }
-export function setAgiSpd(player, value) { player.setDynamicProperty(KEY.agiSpd, value); }
-export function setAgiCrit(player, value) { player.setDynamicProperty(KEY.agiCrit, value); }
-export function setVitHp(player, value) { player.setDynamicProperty(KEY.vitHp, value); }
-export function setVitRed(player, value) { player.setDynamicProperty(KEY.vitRed, value); }
-export function setStrCritDmg(player, value) { player.setDynamicProperty(KEY.strCritDmg, value); }
-export function setAgiEvasion(player, value) { player.setDynamicProperty(KEY.agiEvasion, value); }
-export function setAgiParry(player, value) { player.setDynamicProperty(KEY.agiParry, value); }
-export function setVitBlock(player, value) { player.setDynamicProperty(KEY.vitBlock, value); }
-export function setStrLifesteal(player, value) { player.setDynamicProperty(KEY.strLifesteal, value); }
-export function setVitThorn(player, value) { player.setDynamicProperty(KEY.vitThorn, value); }
-export function setVitRegen(player, value) { player.setDynamicProperty(KEY.vitRegen, value); }
-export function setAgiJump(player, value) { player.setDynamicProperty(KEY.agiJump, value); }
-export function setStrExecute(player, value) { player.setDynamicProperty(KEY.strExecute, value); }
-export function setPoints(player, value) { player.setDynamicProperty(KEY.points, value); }
-export function markStatInitialized(player) { player.setDynamicProperty(KEY.initialized, 1); }
+export function setStrAtk(player, value) { Database.set(player, KEY.strAtk, value); }
+export function setStrProj(player, value) { Database.set(player, KEY.strProj, value); }
+export function setAgiSpd(player, value) { Database.set(player, KEY.agiSpd, value); }
+export function setAgiCrit(player, value) { Database.set(player, KEY.agiCrit, value); }
+export function setVitHp(player, value) { Database.set(player, KEY.vitHp, value); }
+export function setVitRed(player, value) { Database.set(player, KEY.vitRed, value); }
+export function setStrCritDmg(player, value) { Database.set(player, KEY.strCritDmg, value); }
+export function setAgiEvasion(player, value) { Database.set(player, KEY.agiEvasion, value); }
+export function setAgiParry(player, value) { Database.set(player, KEY.agiParry, value); }
+export function setVitBlock(player, value) { Database.set(player, KEY.vitBlock, value); }
+export function setStrLifesteal(player, value) { Database.set(player, KEY.strLifesteal, value); }
+export function setVitThorn(player, value) { Database.set(player, KEY.vitThorn, value); }
+export function setVitRegen(player, value) { Database.set(player, KEY.vitRegen, value); }
+export function setAgiJump(player, value) { Database.set(player, KEY.agiJump, value); }
+export function setStrExecute(player, value) { Database.set(player, KEY.strExecute, value); }
+export function setPoints(player, value) { Database.set(player, KEY.points, value); }
+export function markStatInitialized(player) { Database.set(player, KEY.initialized, 1); }
 
 export function isStatInitialized(player) {
   return getNumber(player, KEY.initialized) === 1;
 }
 
 export function setLevelState(player, level, exp) {
-  player.setDynamicProperty(KEY.level, Math.max(1, Math.floor(level)));
-  player.setDynamicProperty(KEY.exp, Math.max(0, Math.floor(exp)));
+  Database.set(player, KEY.level, Math.max(1, Math.floor(level)));
+  Database.set(player, KEY.exp, Math.max(0, Math.floor(exp)));
 }
 
 export function setPlayerClass(player, classId) {
   if (!STAT_CONFIG.CLASS.CLASSES[classId]) return false;
-  player.setDynamicProperty(KEY.playerClass, classId);
+  Database.set(player, KEY.playerClass, classId);
   return true;
 }
 

@@ -46,7 +46,7 @@ import { ECONOMY_CONFIG } from "../config/economyConfig";
 // shopSystem.js เรียกใช้งานอยู่แล้ว ไม่มี Circular Import (questSystem.js
 // ไม่ import กลับมาที่ไฟล์นี้เลย)
 import { reportHomeTeleport } from "./questSystem";
-import { subscribeSafe } from "../core/eventGuard";
+import { safeAsync } from "../core/asyncUtils";
 
 const HOME_DYNAMIC_PROPERTY_KEY = "prakan_homes";
 const DEFAULT_HOME_NAME = "home";
@@ -125,7 +125,7 @@ subscribeSafe(["entityHurt"], ({ hurtEntity }) => {
 
 // ยกเลิก channel ที่กำลังนับถอยหลังอยู่ — คืนเงินค่าเดินทางเต็มจำนวนถ้ามี
 // การหักไปแล้ว (channel ถูกสร้างหลังหักเงินไปแล้วเสมอ ดู teleportHome())
-function cancelHomeChannel(player, reasonMessageKey) {
+export const cancelHomeChannel = safeAsync(async (player, reasonMessageKey) => {
   const channel = activeHomeChannels.get(player.id);
   if (!channel) return;
 
@@ -239,7 +239,7 @@ function finishHomeTeleport(player, home, name, cost) {
    STORAGE
 ========================= */
 function getHomes(player) {
-  const raw = player.getDynamicProperty(HOME_DYNAMIC_PROPERTY_KEY);
+    const raw = Database.get(player, HOME_DYNAMIC_PROPERTY_KEY);
   if (!raw) return {};
   try {
     const parsed = JSON.parse(raw);
@@ -250,7 +250,7 @@ function getHomes(player) {
 }
 
 function saveHomes(player, homes) {
-  player.setDynamicProperty(HOME_DYNAMIC_PROPERTY_KEY, JSON.stringify(homes));
+    Database.set(player, HOME_DYNAMIC_PROPERTY_KEY, JSON.stringify(homes));
 }
 
 // ตัดช่องว่างหน้า-หลัง จำกัดความยาว และคืนชื่อ default ("home") ถ้าผู้เล่น
@@ -445,7 +445,7 @@ export function previewHomeTeleportCost(player, rawName) {
 ========================= */
 
 // หน้าหลัก — รายชื่อบ้านทั้งหมด + ปุ่มตั้งบ้านใหม่
-export async function openHomeUI(player) {
+export const openHomeUI = safeAsync(async (player) => {
   if (!player?.isValid) return;
 
   const names = listHomeNames(player);

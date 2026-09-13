@@ -16,32 +16,27 @@ import { safeGetScore, getOnlinePlayerNames } from "./scoreboardUtils";
 
 // ดึงยอดเงินผู้เล่น (floor + clamp ไม่ให้ติดลบ)
 export function getMoney(player) {
-  const raw = player.getDynamicProperty("money");
-  return typeof raw === "number" && raw >= 0 ? Math.floor(raw) : 0;
+  const data = Database.get(player, "money");
+  return typeof data === "number" && data >= 0 ? Math.floor(data) : 0;
 }
 
-// ตั้งยอดเงินผู้เล่นตรง ๆ (floor + clamp ไม่ให้ติดลบ) — ใช้เมื่อรู้ยอดใหม่
-// ที่ต้องการอยู่แล้ว (เช่น balance - amount) ต่างจาก changeMoney() ที่รับ
-// เป็น delta บวก/ลบ (รวมมาจาก economy.js / tpBankSystem.js ที่แต่ก่อนต่าง
-// คนต่างมีฟังก์ชันนี้ซ้ำกันเอง)
 export function setMoney(player, value) {
   const clamped = Math.max(0, Math.floor(value));
-  player.setDynamicProperty("money", clamped);
-  syncMoneyScore(player, clamped); // มิเรอร์เข้ากระดานอันดับเงิน — ดูด้านล่างไฟล์
+  Database.set(player, "money", clamped);
+  syncMoneyScore(player, clamped);
 }
 
-// บวก/ลบเงินผู้เล่น พร้อม clamp ไม่ให้ติดลบ (เดิมบางไฟล์ เช่น shopEffect.js ไม่ clamp)
 export function changeMoney(player, delta) {
   const current = getMoney(player);
   const newValue = Math.max(0, Math.floor(current + delta));
-  player.setDynamicProperty("money", newValue);
-  syncMoneyScore(player, newValue); // มิเรอร์เข้ากระดานอันดับเงิน — ดูด้านล่างไฟล์
+  Database.set(player, "money", newValue);
+  syncMoneyScore(player, newValue);
   return newValue;
 }
 
 // นับจำนวนไอเทมชนิดเดียวกันทั้งหมดในกระเป๋า
 export function countItemInInventory(container, itemId) {
-  const size = container.containerSize ?? container.size ?? 36;
+    const size = getContainerSize(container);
   let total = 0;
   for (let i = 0; i < size; i++) {
     const stack = container.getItem(i);
@@ -53,7 +48,7 @@ export function countItemInInventory(container, itemId) {
 // เอาไอเทมออกจากกระเป๋าตามจำนวนที่ระบุ คืนค่าจำนวนที่เอาออกได้จริง
 export function removeItemFromInventory(container, itemId, amountToRemove) {
   let remaining = amountToRemove;
-  const size = container.containerSize ?? container.size ?? 36;
+    const size = getContainerSize(container);
 
   for (let i = 0; i < size && remaining > 0; i++) {
     const stack = container.getItem(i);

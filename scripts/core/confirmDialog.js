@@ -17,6 +17,7 @@ import { ActionFormData, MessageFormData } from "@minecraft/server-ui";
 import { t } from "../ui/locale/index";
 import { NavigationManager } from "../ui/framework/NavigationManager";
 import { CONFIRM_DIALOG_DEFAULTS, ICONS } from "../config/uiConfig";
+import { safeAsync } from "./asyncUtils";
 
 /**
  * แสดงหน้าจอยืนยัน (ปุ่มยืนยัน/ยกเลิก) แบบมาตรฐานเดียวกันทั้งแอดออน
@@ -30,7 +31,7 @@ import { CONFIRM_DIALOG_DEFAULTS, ICONS } from "../config/uiConfig";
  *   onCancel?: () => void
  * }} opts
  */
-export async function showConfirm(opts) {
+export const showConfirm = safeAsync(async (opts) => {
   const {
     player,
     titleKey, titleVars, bodyKey, bodyVars,
@@ -80,7 +81,7 @@ export async function showConfirm(opts) {
  *   onCancel?: () => void
  * }} opts
  */
-export async function showIconConfirm(opts) {
+export const showIconConfirm = safeAsync(async (opts) => {
   const {
     player,
     titleKey, titleVars, bodyKey, bodyVars,

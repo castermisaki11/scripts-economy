@@ -21,7 +21,7 @@ import { openDailyQuestUI, openWeeklyQuestUI } from "./slotUi";
 import { openAchievementsUI } from "./achievementUi";
 import { openChainsUI } from "./chainUi";
 
-export async function openQuestUI(player) {
+export const openQuestUI = safeAsync(async (player) => {
   if (!player?.isValid) return;
 
   const data = readQuestData(player);

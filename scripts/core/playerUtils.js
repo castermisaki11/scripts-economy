@@ -100,3 +100,18 @@ export function resolveAttackingPlayer(damageSource) {
   const attacker = resolveAttacker(damageSource);
   return attacker?.typeId === "minecraft:player" && attacker.isValid ? attacker : undefined;
 }
+
+// Find online player by id
+export function findOnlinePlayerById(id) {
+  return world.getPlayers().find(p => p.id === id) ?? null;
+}
+
+// Find online player by name
+export function findOnlinePlayerByName(name) {
+  return world.getPlayers().find(p => p.name === name) ?? null;
+}
+
+// Find online player by id or name
+export function findOnlinePlayerByIdOrName(idOrName) {
+  return findOnlinePlayerById(idOrName) ?? findOnlinePlayerByName(idOrName);
+}

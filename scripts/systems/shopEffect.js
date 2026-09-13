@@ -68,7 +68,7 @@ function purchaseEffect(player, { id, label, cost, duration, amp }) {
     return true;
 }
 
-export async function openShopMenu(player) {
+export const openShopMenu = safeAsync(async (player) => {
     if (!player?.isValid) return;
 
     const items = EFFECTS.map(e => ({
@@ -92,7 +92,7 @@ export async function openShopMenu(player) {
     });
 }
 
-async function openPresetMenu(player, cfg) {
+export const openPresetMenu = safeAsync(async (player, cfg) => {
     if (!player?.isValid) return;
 
     const { BASE_UNIT_SECONDS, SINGLE_LEVEL_DURATIONS, LEVELED_AMPS, LEVELED_DURATIONS } = SHOP_CONFIG.EFFECT_SHOP;
@@ -161,7 +161,7 @@ async function openPresetMenu(player, cfg) {
 // =========================
 // ยืนยันการซื้อเอฟเฟกต์
 // =========================
-async function openEffectConfirm(player, cfg, pick) {
+export const openEffectConfirm = safeAsync(async (player, cfg, pick) => {
     const effectName = t(cfg.labelKey);
     const fullLabel = t(pick.labelKey, pick.labelVars);
 

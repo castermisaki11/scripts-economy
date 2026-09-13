@@ -54,7 +54,7 @@ const CATEGORIES = [
 /* =========================
    หน้าแรก — เลือกหมวดกระดาน
 ========================= */
-export async function openMoneyScoreboardUI(player) {
+export const openMoneyScoreboardUI = safeAsync(async (player) => {
   if (!player?.isValid) return;
 
   return createListMenu(player, {
@@ -76,7 +76,7 @@ export async function openMoneyScoreboardUI(player) {
 /* =========================
    หน้ากระดานรายหมวด (Top 10 + อันดับตัวเอง)
 ========================= */
-async function openBoard(player, category) {
+export const openBoard = safeAsync(async (player, category) => {
   if (!player?.isValid) return;
 
   const isMoney = category.objectiveName === null;

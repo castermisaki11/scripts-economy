@@ -64,7 +64,7 @@ function categoryRerollConfig(category) {
   return category === "daily" ? QUEST_CONFIG.DAILY : QUEST_CONFIG.WEEKLY;
 }
 
-async function openSlotListUI(player, category) {
+export const openSlotListUI = safeAsync(async (player, category) => {
   if (!player?.isValid) return;
 
   const data = readQuestData(player);
@@ -109,11 +109,11 @@ async function openSlotListUI(player, category) {
   });
 }
 
-export async function openDailyQuestUI(player) {
+export const openDailyQuestUI = safeAsync(async (player) => {
   return openSlotListUI(player, "daily");
 }
 
-export async function openWeeklyQuestUI(player) {
+export const openWeeklyQuestUI = safeAsync(async (player) => {
   return openSlotListUI(player, "weekly");
 }
 
@@ -123,7 +123,7 @@ export async function openWeeklyQuestUI(player) {
    ช่องที่เสร็จแล้วไม่มีปุ่ม Reroll เลย (อ่านอย่างเดียว รอรีเซ็ตรอบถัดไป)
 ========================= */
 
-async function openQuestSlotDetailUI(player, category, slotIndex) {
+export const openQuestSlotDetailUI = safeAsync(async (player, category, slotIndex) => {
   if (!player?.isValid) return;
 
   const data = readQuestData(player);

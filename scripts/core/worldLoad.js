@@ -39,5 +39,16 @@ world.afterEvents.worldLoad.subscribe(() => {
  * @param {() => void} callback
  */
 export function onWorldLoad(callback) {
+  // รองรับ callback ที่อาจเป็น async
   callbacks.push(callback);
 }
+
+/**
+ * ลบ callback ที่ลงทะเบียนแล้ว (ถ้าต้องการยกเลิก)
+ * @param {() => void} callback
+ */
+export function offWorldLoad(callback) {
+  const idx = callbacks.indexOf(callback);
+  if (idx !== -1) callbacks.splice(idx, 1);
+}
+

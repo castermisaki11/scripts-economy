@@ -58,7 +58,7 @@ export function createPagedList(items, page = 0) {
  *   onCancel?: () => void
  * }} opts
  */
-export async function createListMenu(player, opts) {
+export const createListMenu = safeAsync(async (player, opts) => {
   if (!player?.isValid) return;
   const {
     titleKey,
@@ -179,7 +179,7 @@ export async function createListMenu(player, opts) {
  *   messageKey: string, messageVars?: object
  * }} opts
  */
-export async function createResultMessage(player, opts) {
+export const createResultMessage = safeAsync(async (player, opts) => {
   if (!player?.isValid) return;
   const { type = "success", titleKey = "ui.result", messageKey, messageVars } = opts;
 
@@ -210,7 +210,7 @@ export async function createResultMessage(player, opts) {
  *   onCancel?: () => void
  * }} opts
  */
-export async function createAmountPrompt(player, opts) {
+export const createAmountPrompt = safeAsync(async (player, opts) => {
   if (!player?.isValid) return;
   const { titleKey, titleVars, promptKey, promptVars, placeholder = "", onSubmit, onCancel } = opts;
 
@@ -241,7 +241,7 @@ export async function createAmountPrompt(player, opts) {
  *   onCancel?: () => void
  * }} opts
  */
-export async function createTogglesPrompt(player, opts) {
+export const createTogglesPrompt = safeAsync(async (player, opts) => {
   if (!player?.isValid) return;
   const { titleKey, titleVars, toggles, onSubmit, onCancel } = opts;
 
@@ -280,7 +280,7 @@ export async function createTogglesPrompt(player, opts) {
  *   onCancel?: () => void
  * }} opts
  */
-export async function createModalPrompt(player, opts) {
+export const createModalPrompt = safeAsync(async (player, opts) => {
   if (!player?.isValid) return;
   const { titleKey, titleVars, fields, onSubmit, onCancel } = opts;
 

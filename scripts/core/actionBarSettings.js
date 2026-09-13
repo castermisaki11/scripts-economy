@@ -20,7 +20,7 @@ const ACTIONBAR_DYNAMIC_PROPERTY_KEY = "actionBarSettings";
 
 function readSavedMap(player) {
   try {
-    const raw = player.getDynamicProperty(ACTIONBAR_DYNAMIC_PROPERTY_KEY);
+    const raw = Database.get(player, ACTIONBAR_DYNAMIC_PROPERTY_KEY);
     if (typeof raw !== "string") return {};
     const parsed = JSON.parse(raw);
     return parsed && typeof parsed === "object" ? parsed : {};
@@ -69,5 +69,5 @@ export function getActionBarSettings(player) {
  */
 export function saveActionBarSettings(player, settings) {
   if (!player?.isValid) return;
-  player.setDynamicProperty(ACTIONBAR_DYNAMIC_PROPERTY_KEY, JSON.stringify(settings));
+  Database.set(player, ACTIONBAR_DYNAMIC_PROPERTY_KEY, JSON.stringify(settings));
 }

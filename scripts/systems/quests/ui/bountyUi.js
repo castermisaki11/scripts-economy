@@ -92,7 +92,7 @@ function handleRerollButton(player, data) {
    (ui/rootMenu.js) และหน้าจอ Bounty เดิมทั้งหมดย้ายมาอยู่ที่นี่
 ========================= */
 
-export async function openBountyQuestUI(player) {
+export const openBountyQuestUI = safeAsync(async (player) => {
   if (!player?.isValid) return;
 
   const data = readQuestData(player);

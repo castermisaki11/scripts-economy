@@ -48,7 +48,7 @@ function readChainState(player) {
    CHAIN LIST (หน้าแรก)
 ========================= */
 
-export async function openChainsUI(player) {
+export const openChainsUI = safeAsync(async (player) => {
   if (!player?.isValid) return;
 
   const { completed, active } = readChainState(player);
@@ -102,7 +102,7 @@ export async function openChainsUI(player) {
    CHAIN DETAIL
 ========================= */
 
-async function openChainDetailUI(player, chainId) {
+export const openChainDetailUI = safeAsync(async (player, chainId) => {
   if (!player?.isValid) return;
 
   const chainDef = getChainById(chainId);

@@ -18,7 +18,7 @@ import { getInventoryContainer } from "../core/itemUtils";
 // ลูปตาม ENCHANT_MASTER_ORDER ตัวที่ใส่ไม่ได้ (ไม่ตรงชนิดไอเทม หรือขัดแย้ง
 // กันเอง) จะถูกข้ามไป silently ต่อตัว ไอเทมที่ไม่มี component enchantable
 // จะคืนค่าเดิมโดยไม่ทำอะไร
-function enchantItemStack(itemStack) {
+export const enchantItemStack = safeAsync(async (itemStack) => {
   if (!itemStack) return false;
   const enchantable = itemStack.getComponent("minecraft:enchantable");
   if (!enchantable) return false;
@@ -68,7 +68,7 @@ export function enchantPlayerAllGear(player) {
 
     const container = getInventoryContainer(player);
     if (container) {
-      const size = container.size ?? 36;
+      const size = getContainerSize(container);
       for (let i = 0; i < size; i++) {
         try {
           const item = container.getItem(i);

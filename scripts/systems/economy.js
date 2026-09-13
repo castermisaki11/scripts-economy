@@ -50,7 +50,7 @@ import { BANK_DYNAMIC_PROPERTY_KEY, TICKS_PER_SECOND } from "../core/constants";
 import { formatDateTime } from "../core/timeUtils";
 import { ECONOMY_CONFIG } from "../config/economyConfig";
 import { ICONS } from "../config/uiConfig";
-import { subscribeSafe } from "../core/eventGuard";
+import { safeAsync } from "../core/asyncUtils";
 
 /* =========================
    CONFIG
@@ -106,7 +106,7 @@ function addLog(data) {
 /* =========================
    MAIN TRANSFER UI
 ========================= */
-export async function openTransferUI(player) {
+export const openTransferUI = safeAsync(async (player) => {
   if (!player?.isValid) return;
 
   const nearbyPlayers = findNearbyPlayers(player, TRANSFER_DISTANCE);
@@ -150,7 +150,7 @@ export async function openTransferUI(player) {
 /* =========================
    AMOUNT / CONFIRM
 ========================= */
-async function openAmountUI(sender, target) {
+export const openAmountUI = safeAsync(async (sender, target) => {
   return createAmountPrompt(sender, {
     titleKey: "transfer.amountTitle",
     promptKey: "transfer.amountPrompt",
@@ -174,7 +174,7 @@ async function openAmountUI(sender, target) {
   });
 }
 
-async function openConfirmUI(sender, target, amount) {
+export const openConfirmUI = safeAsync(async (sender, target, amount) => {
   const tax = Math.floor(amount * getTaxRate());
   const receive = amount - tax;
 
@@ -303,7 +303,7 @@ function openAdminUI(admin) {
 /* =========================
    ADMIN BANK -> PLAYER
 ========================= */
-async function openAdminTransferUI(admin) {
+async export const openAdminTransferUI = safeAsync(async (admin) => {
   if (!admin?.isValid) return;
 
   const players = world.getPlayers();
@@ -389,7 +389,7 @@ function openTaxSettingUI(admin) {
 /* =========================
    VIEW ALL LOGS
 ========================= */
-async function openLogUI(admin) {
+export const openLogUI = safeAsync(async (admin) => {
   if (!admin?.isValid) return;
 
   const logs = getLogs();
@@ -432,7 +432,7 @@ function openSearchLogUI(admin) {
   });
 }
 
-async function showSearchResult(admin, name) {
+export const showSearchResult = safeAsync(async (admin, name) => {
   if (!admin?.isValid) return;
 
   const logs = getLogs();

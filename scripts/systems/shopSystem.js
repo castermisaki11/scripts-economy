@@ -19,6 +19,7 @@ import {
   addItemToInventory,
   depositToBank
 } from "../core/economyUtils";
+import Cache from "../core/Cache";
 import {
   hasItem,
   getSellPrice,
@@ -46,7 +47,9 @@ function categoryLabel(category) {
   return t(getCategoryLabelKey(category));
 }
 
-// Progress bar ด้วย Unicode block — ใช้ในหน้าเมนูซื้อแสดงสถิติปลดล็อค
+// Cache keys
+const CACHE_SHOP_PRICES = "shopPrices";
+
 function buildProgressBar(ratio, length = 10) {
   const filled = Math.round(ratio * length);
   const empty = length - filled;
@@ -69,7 +72,10 @@ function buildProgressBar(ratio, length = 10) {
 // อย่างเดียวก็ขายได้ทันทีเมื่อผู้เล่นถือของนั้นอยู่ ไม่ต้องแก้ไฟล์นี้เลย
 // =====================================================
 
-export async function openSellMenu(player) {
+import { safeAsync } from "../core/asyncUtils";
+
+
+export const openSellMenu = safeAsync(async (player) => {
   if (!player?.isValid) return;
   const container = getInventoryContainer(player);
   if (!container) return;
@@ -77,7 +83,7 @@ export async function openSellMenu(player) {
   // สแกนกระเป๋าครั้งเดียว นับจำนวนไอเทมที่ขายได้ (มีอยู่ในฐานข้อมูลไอเทม)
   // ที่ผู้เล่นถืออยู่จริง
   const owned = new Map();
-  const size = container.size ?? 36;
+    const size = getContainerSize(container);
 
   for (let i = 0; i < size; i++) {
     const stack = container.getItem(i);
@@ -131,7 +137,7 @@ export async function openSellMenu(player) {
 // =========================
 // ขายทั้งหมดในกระเป๋า (ทุกไอเทมที่ขายได้ในคลัง — ไม่ใช่แค่ชนิดเดียว)
 // =========================
-async function openSellAllConfirm(player, ids) {
+export const openSellAllConfirm = safeAsync(async (player, ids) => {
   // คำนวณยอดรวมใหม่ ณ ตอนเปิดหน้ายืนยัน กันกรณีของเปลี่ยนไปแล้วระหว่างที่
   // เมนูก่อนหน้าเปิดอยู่ (เหมือน openSellItemMenu เช็ค owned ใหม่ตอนเปิด)
   // พร้อมกันนี้เก็บรายการ "ชื่อ ×จำนวน = เงิน" ทีละชนิดไว้โชว์ในหน้ายืนยัน
@@ -215,7 +221,7 @@ function sellAllInventory(player, ids) {
   NavigationManager.close(player);
 }
 
-async function openSellItemMenu(player, itemId) {
+export const openSellItemMenu = safeAsync(async (player, itemId) => {
   if (!player?.isValid) return;
 
   const owned = countItem(player, itemId);
@@ -252,7 +258,7 @@ async function openSellItemMenu(player, itemId) {
   });
 }
 
-async function openSellCustomAmount(player, itemId, owned) {
+export const openSellCustomAmount = safeAsync(async (player, itemId, owned) => {
   return createAmountPrompt(player, {
     titleKey: "ui.sellAmountTitle",
     titleVars: { name: getItemDisplayName(itemId) },
@@ -282,7 +288,7 @@ async function openSellCustomAmount(player, itemId, owned) {
 // =========================
 // ยืนยันการขาย
 // =========================
-async function openSellConfirm(player, itemId, amount) {
+export const openSellConfirm = safeAsync(async (player, itemId, amount) => {
   const price = getSellPrice(itemId);
   const total = amount * price;
 
@@ -340,7 +346,7 @@ function sellItems(player, itemId, amount) {
 // BUY MENU
 // =====================================================
 
-export async function openBuyCategoryPicker(player) {
+export const openBuyCategoryPicker = safeAsync(async (player) => {
   if (!player?.isValid) return;
 
   // รายการหมวดหมู่มาจาก data/shops.js ทั้งหมด — เพิ่มหมวดหมู่ใหม่ในอนาคต
@@ -375,7 +381,25 @@ export async function openBuyCategoryPicker(player) {
   });
 }
 
-export async function openBuyMenu(player, category) {
+function getCachedBuyPrices(){
+  const cached = Cache.get(CACHE_SHOP_PRICES);
+  if (cached) return cached;
+  const map = {};
+  // get all enabled items
+  const allIds = getItemsByCategory();
+  for (const id of allIds) {
+    const price = getBuyPrice(id);
+    if (price > 0) map[id] = price;
+  }
+  Cache.set(CACHE_SHOP_PRICES, map);
+  return map;
+}
+function getCachedBuyPrice(id){
+  const map = getCachedBuyPrices();
+  return map[id] ?? getBuyPrice(id);
+}
+
+export const openBuyMenu = safeAsync(async (player, category) => {
   if (!player?.isValid) return;
 
   const ids = getItemsByCategory(category);
@@ -397,7 +421,7 @@ export async function openBuyMenu(player, category) {
         id,
         locked: false,
         labelKey: "ui.buyItemButton",
-        labelVars: { name: getItemDisplayName(id), price: getBuyPrice(id) },
+        labelVars: { name: getItemDisplayName(id), price: getCachedBuyPrice(id) },
         icon: getItemIcon(id)
       };
     }
@@ -451,7 +475,7 @@ export async function openBuyMenu(player, category) {
 // =========================
 // ปลดล็อคร้านค้า — จ่าย sellPrice × 5 เพื่อปลดล็อคไอเทม
 // =========================
-async function openUnlockConfirm(player, itemId, unlockCost) {
+export const openUnlockConfirm = safeAsync(async (player, itemId, unlockCost) => {
   return showIconConfirm({
     player,
     titleKey: "ui.buyUnlockConfirmTitle",
@@ -492,10 +516,10 @@ function executeUnlock(player, itemId, unlockCost) {
   NavigationManager.back(player);
 }
 
-async function openBuyItemMenu(player, itemId, category) {
+export const openBuyItemMenu = safeAsync(async (player, itemId, category) => {
   if (!player?.isValid) return;
 
-  const price = getBuyPrice(itemId);
+  const price = getCachedBuyPrice(itemId);
   const presets = SHOP_CONFIG.BUY_AMOUNT_PRESETS;
   const items = [
     ...presets.map(amount => ({
@@ -525,7 +549,7 @@ async function openBuyItemMenu(player, itemId, category) {
   });
 }
 
-async function openBuyCustomAmount(player, itemId, category) {
+export const openBuyCustomAmount = safeAsync(async (player, itemId, category) => {
   return createAmountPrompt(player, {
     titleKey: "ui.buyAmountTitle",
     titleVars: { name: getItemDisplayName(itemId) },
@@ -551,8 +575,8 @@ async function openBuyCustomAmount(player, itemId, category) {
 // =========================
 // ยืนยันการซื้อ
 // =========================
-async function openBuyConfirm(player, itemId, amount, category) {
-  const price = getBuyPrice(itemId);
+export const openBuyConfirm = safeAsync(async (player, itemId, amount, category) => {
+  const price = getCachedBuyPrice(itemId);
   const total = amount * price;
 
   return showIconConfirm({
@@ -570,7 +594,7 @@ async function openBuyConfirm(player, itemId, amount, category) {
 }
 
 function buyItems(player, itemId, amount, category) {
-  const price = getBuyPrice(itemId);
+  const price = getCachedBuyPrice(itemId);
   const totalCost = price * amount;
   const money = getMoney(player);
 

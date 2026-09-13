@@ -79,7 +79,7 @@ export function findItemStack(player, itemId) {
   const container = getInventoryContainer(player);
   if (!container) return null;
 
-  const size = container.size ?? 36;
+  const size = getContainerSize(container);
   for (let i = 0; i < size; i++) {
     const stack = container.getItem(i);
     if (stack?.typeId === itemId) return stack;

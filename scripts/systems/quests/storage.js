@@ -212,7 +212,7 @@ export function migrateQuestData(raw) {
 export function readQuestData(player) {
   const defaultData = defaultQuestData();
   try {
-    const raw = player.getDynamicProperty(QUEST_DYNAMIC_PROPERTY_KEY);
+    const raw = Database.get(player, QUEST_DYNAMIC_PROPERTY_KEY);
     if (typeof raw === "string") {
       const parsed = JSON.parse(raw);
       const migrated = migrateQuestData(parsed);
@@ -251,7 +251,7 @@ export function readQuestData(player) {
           migrated.chains.completed.length > 0 ||
           Object.values(migrated.lifetime).some((v) => v > 0)
         ) {
-          player.setDynamicProperty(QUEST_DYNAMIC_PROPERTY_KEY, JSON.stringify(migrated));
+          Database.set(player, QUEST_DYNAMIC_PROPERTY_KEY, JSON.stringify(migrated));
           return migrated;
         }
       }
@@ -270,7 +270,7 @@ export function readQuestData(player) {
 export function saveQuestData(player, data) {
   if (!player?.isValid) return;
   const serialized = JSON.stringify(data);
-  player.setDynamicProperty(QUEST_DYNAMIC_PROPERTY_KEY, serialized);
+    Database.set(player, QUEST_DYNAMIC_PROPERTY_KEY, serialized);
 
   // Mirror ไป world backup (per-player key)
   try {

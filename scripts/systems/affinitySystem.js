@@ -144,7 +144,7 @@ function applyStatGrowth(player) {
   // Combine all bonuses into one object
   const allBonuses = { ...statGrowth, ...passiveBonuses };
 
-  player.setDynamicProperty("affinity:growth", JSON.stringify(allBonuses));
+    Database.set(player, "affinity:growth", JSON.stringify(allBonuses));
 }
 
 // =========================
@@ -228,7 +228,7 @@ export function getAffinityBonuses(player) {
   if (cached && cached.tick === system.currentTick) return cached.bonuses;
 
   try {
-    const raw = player.getDynamicProperty("affinity:growth");
+    const raw = Database.get(player, "affinity:growth");
     if (typeof raw === "string") {
       const parsed = JSON.parse(raw);
       affinityBonusesCache.set(player.id, { tick: system.currentTick, bonuses: parsed });

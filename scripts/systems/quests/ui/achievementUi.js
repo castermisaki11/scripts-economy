@@ -40,7 +40,7 @@ function groupByStat(achievements) {
 // ไม่ต้องคำนวณใหม่ทุกครั้งที่เปิดเมนู
 const GROUPED_ACHIEVEMENTS = groupByStat(QUEST_ACHIEVEMENTS);
 
-export async function openAchievementsUI(player) {
+export const openAchievementsUI = safeAsync(async (player) => {
   if (!player?.isValid) return;
 
   const data = readQuestData(player);
@@ -70,7 +70,7 @@ export async function openAchievementsUI(player) {
   });
 }
 
-async function openAchievementGroupUI(player, statKey) {
+export const openAchievementGroupUI = safeAsync(async (player, statKey) => {
   if (!player?.isValid) return;
 
   const data = readQuestData(player);

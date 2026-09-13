@@ -38,13 +38,15 @@ import {
     getMarket, saveMarket,
     getPendingMoney, addPendingMoney, clearPendingMoney,
     getPendingItems,
-    getBankBalance, addBankBalance, clearBankBalance,
+    getBankBalance, depositToBank, withdrawFromBank,
     getWatchlist, saveWatchlist, getWatchAlerts, saveWatchAlerts,
     playSound, sortListings, notifySellerOfSale, notifyWatchers,
     serializeItemStack, rebuildItemFromListing,
     pruneExpiredListings, claimPendingItemsLogic,
-    findOnlinePlayerByName, addPendingQuestMarketSale
-} from "../../systems/playerMarket";
+    findOnlinePlayerById, findOnlinePlayerByName, findOnlinePlayerByIdOrName,
+    addPendingQuestMarketSale
+} from "../../core/economyUtils";
+import { findOnlinePlayerById, findOnlinePlayerByName, findOnlinePlayerByIdOrName } from "../../core/playerUtils";
 // Phase 3B: แจ้งระบบเควส (systems/quests/reportApi.js) ตอนของขายออกในตลาด
 // ผู้เล่นสำเร็จ — เหมือน reportItemSold()/reportItemBought() ที่
 // shopSystem.js เรียกใช้งานอยู่แล้ว ไม่มี Circular Import (questSystem.js
@@ -91,7 +93,7 @@ function claimMoney(player) {
 
 // --- Main UI ---
 
-export async function openMarketUI(player) {
+export const openMarketUI = safeAsync(async (player) => {
     if (!player?.isValid) return;
     pruneExpiredListings();
     const pendingMoney = getPendingMoney(player);
@@ -149,7 +151,7 @@ export async function openMarketUI(player) {
 
 // --- ตลาด: รายการสินค้า + ค้นหา ---
 
-async function showMarketList(player, query = "", sortMode = "newest") {
+export const showMarketList = safeAsync(async (player, query = "", sortMode = "newest") => {
     if (!player?.isValid) return;
     let market = getMarket();
 
@@ -208,7 +210,7 @@ async function showMarketList(player, query = "", sortMode = "newest") {
     });
 }
 
-async function openMarketSearch(player, previousQuery = "", sortMode = "newest") {
+export const openMarketSearch = safeAsync(async (player, previousQuery = "", sortMode = "newest") => {
     return createAmountPrompt(player, {
         titleKey: "market.searchTitle",
         promptKey: "market.searchPrompt",
@@ -222,7 +224,7 @@ async function openMarketSearch(player, previousQuery = "", sortMode = "newest")
 
 // เมนูเลือกลำดับการแสดงผล — modal ชั่วคราวเหมือน openMarketSearch ข้างบน
 // ไม่ push เข้าสแตก (กด X/ยกเลิก ก็แค่วาด showMarketList เดิมใหม่)
-async function openSortMenu(player, query, currentSort) {
+export const openSortMenu = safeAsync(async (player, query, currentSort) => {
     const defaultIndex = Math.max(0, SORT_MODES.findIndex(m => m.id === currentSort));
 
     return createModalPrompt(player, {
@@ -244,7 +246,7 @@ async function openSortMenu(player, query, currentSort) {
 }
 
 // --- ระบบการซื้อ (จุดที่หักภาษีไปเข้า Bank) ---
-async function confirmPurchase(player, itemData) {
+export const confirmPurchase = safeAsync(async (player, itemData) => {
     const tax = Math.floor(itemData.price * TAX_RATE); // คำนวณภาษี
     const profit = itemData.price - tax; // เงินที่คนขายจะได้
 
@@ -299,7 +301,7 @@ async function confirmPurchase(player, itemData) {
                 addPendingMoney(itemData.sellerId ?? itemData.seller, profit);
                 addBankBalance(tax);
                 notifySellerOfSale(player, itemData, profit);
-                const sellerPlayer = (itemData.sellerId ? world.getPlayers().find(p => p.id === itemData.sellerId) : null) ?? findOnlinePlayerByName(itemData.seller);
+    const sellerPlayer = findOnlinePlayerById(itemData.sellerId) ?? findOnlinePlayerByName(itemData.seller);
                 if (sellerPlayer?.isValid) {
                     reportMarketSold(sellerPlayer, itemData.itemType, itemData.amount);
                 } else {
@@ -325,7 +327,7 @@ async function confirmPurchase(player, itemData) {
 }
 
 // --- ฟังก์ชันเสริมสำหรับ Admin (ใช้ดูหรือเบิกเงินธนาคาร) ---
-export async function adminBankUI(player) {
+export const adminBankUI = safeAsync(async (player) => {
     if (!isAdmin(player)) return;
 
     const bankTotal = getBankBalance();
@@ -360,7 +362,7 @@ export async function adminBankUI(player) {
 }
 
 // --- ลงขายสินค้า ---
-async function showInventorySell(player) {
+export const showInventorySell = safeAsync(async (player) => {
     if (!player?.isValid) return;
     const inventory = getInventoryContainer(player);
     const itemsInInv = [];
@@ -397,7 +399,7 @@ async function showInventorySell(player) {
     });
 }
 
-async function showPriceInput(player, itemInfo) {
+export const showPriceInput = safeAsync(async (player, itemInfo) => {
     return createModalPrompt(player, {
         titleKey: "market.setPriceTitle",
         fields: [
@@ -465,7 +467,7 @@ async function showPriceInput(player, itemInfo) {
 
 // เมนูจัดการ listing ของตัวเอง (แทนที่การพาไปหน้ายกเลิกตรง ๆ) — เลือกได้ว่า
 // จะแก้ราคา (ไม่ต้องถอนของออกจากตลาด) หรือยกเลิกการขาย (showCancelForm เดิม)
-async function showOwnListingMenu(player, itemData) {
+export const showOwnListingMenu = safeAsync(async (player, itemData) => {
     return createListMenu(player, {
         titleKey: "market.manageListingTitle",
         bodyKey: "market.manageListingBody",
@@ -490,7 +492,7 @@ async function showOwnListingMenu(player, itemData) {
 
 // แก้ราคาของ listing ที่ยังลงขายอยู่ โดยไม่ต้องยกเลิก+ลงขายใหม่ทั้งหมด —
 // ใช้ MAX_LISTING_PRICE เดียวกับตอนลงขายครั้งแรก (showPriceInput)
-async function showEditPriceForm(player, itemData) {
+export const showEditPriceForm = safeAsync(async (player, itemData) => {
     return createModalPrompt(player, {
         titleKey: "market.editPriceTitle",
         fields: [
@@ -526,7 +528,7 @@ async function showEditPriceForm(player, itemData) {
     });
 }
 
-async function showCancelForm(player, itemData) {
+export const showCancelForm = safeAsync(async (player, itemData) => {
     return showConfirm({
         player,
         titleKey: "market.cancelListingTitle",
@@ -554,7 +556,7 @@ async function showCancelForm(player, itemData) {
 // --- ระบบติดตามไอเทม: หน้าจอ ---
 
 // รายการคำค้นหาที่ผู้เล่นติดตามอยู่ + ปุ่มเพิ่มรายการใหม่ (สูงสุด MAX_WATCHLIST_ITEMS)
-async function showWatchlist(player) {
+export const showWatchlist = safeAsync(async (player) => {
     const watching = getWatchlist(player);
 
     const items = [
@@ -589,7 +591,7 @@ async function showWatchlist(player) {
 
 // เพิ่มคำค้นหาใหม่เข้า watchlist — ใช้ตัวเทียบ query เดียวกับตอนค้นหาในตลาด
 // (searchItems) กันไม่ให้พฤติกรรม "ตรงกัน" ต่างจากตอนค้นหาจริง
-async function showAddWatchlist(player) {
+export const showAddWatchlist = safeAsync(async (player) => {
     return createAmountPrompt(player, {
         titleKey: "market.watchAddTitle",
         promptKey: "market.watchAddPrompt",
@@ -623,7 +625,7 @@ async function showAddWatchlist(player) {
 }
 
 // เลิกติดตามคำค้นหาที่เลือก
-async function showRemoveWatchConfirm(player, target) {
+export const showRemoveWatchConfirm = safeAsync(async (player, target) => {
     return showConfirm({
         player,
         titleKey: "market.watchRemoveTitle",
@@ -643,7 +645,7 @@ async function showRemoveWatchConfirm(player, target) {
 // รายการแจ้งเตือนที่ค้างไว้ (จากตอนออฟไลน์ หรือพลาดข้อความแชทตอนออนไลน์) —
 // ล้างคิวทันทีที่เปิดหน้านี้ (อ่านครั้งเดียวถือว่ารับทราบแล้ว เหมือน inbox
 // ทั่วไป) กันไม่ให้ dynamic property โตไม่มีที่สิ้นสุดโดยไม่ต้องมีปุ่มล้างแยก
-async function showWatchAlerts(player) {
+export const showWatchAlerts = safeAsync(async (player) => {
     const alerts = getWatchAlerts(player);
     saveWatchAlerts(player, []);
 

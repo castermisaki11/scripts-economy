@@ -52,7 +52,7 @@ const JOB_DYNAMIC_PROPERTY_KEY = "jobData";
 
 function readJobData(player) {
   try {
-    const raw = player.getDynamicProperty(JOB_DYNAMIC_PROPERTY_KEY);
+    const raw = Database.get(player, JOB_DYNAMIC_PROPERTY_KEY);
     if (typeof raw !== "string") return { currentJob: null, changedAt: 0, jobs: {} };
     const parsed = JSON.parse(raw);
     if (!parsed || typeof parsed !== "object") return { currentJob: null, changedAt: 0, jobs: {} };
@@ -68,7 +68,7 @@ function readJobData(player) {
 
 function saveJobData(player, data) {
   if (!player?.isValid) return;
-  player.setDynamicProperty(JOB_DYNAMIC_PROPERTY_KEY, JSON.stringify(data));
+    Database.set(player, JOB_DYNAMIC_PROPERTY_KEY, JSON.stringify(data));
 }
 
 // exp/level ปัจจุบันของผู้เล่นในอาชีพหนึ่ง ๆ — ค่าเริ่มต้น {exp:0, level:1}
@@ -409,7 +409,7 @@ function buildVipLine(player) {
    UI: หน้าหลักของระบบอาชีพ
 ========================= */
 
-export async function openJobUI(player) {
+export const openJobUI = safeAsync(async (player) => {
   if (!player?.isValid) return;
 
   const data = readJobData(player);
@@ -465,7 +465,7 @@ export async function openJobUI(player) {
    UI: เลือก/เปลี่ยนอาชีพ
 ========================= */
 
-async function openJobSelectUI(player) {
+export const openJobSelectUI = safeAsync(async (player) => {
   if (!player?.isValid) return;
 
   const data = readJobData(player);
@@ -573,7 +573,7 @@ function formatTypeIdName(typeId) {
     .join(" ");
 }
 
-async function openJobRewardsPickerUI(player) {
+export const openJobRewardsPickerUI = safeAsync(async (player) => {
   if (!player?.isValid) return;
 
   const items = getJobs().map((j) => ({ id: j.id, labelKey: j.nameKey, icon: j.icon }));
@@ -588,7 +588,7 @@ async function openJobRewardsPickerUI(player) {
   });
 }
 
-async function openJobRewardsUI(player, jobId) {
+export const openJobRewardsUI = safeAsync(async (player, jobId) => {
   if (!player?.isValid) return;
 
   const job = getJobById(jobId);
