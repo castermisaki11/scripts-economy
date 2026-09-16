@@ -83,6 +83,152 @@ tools/
 manifest.json                 # Minecraft addon manifest (format_version 2)
 ```
 
+## Code style
+- Indentation: **2 spaces** (ไม่ใช้ tabs)
+- Semicolons: **always** — ทุก statement ต้องมี `;`
+- Quotes: **double quotes** (`"`) เสมอ
+- Arrow functions: **block body** `{ return x; }` เว้นแต่ callback สั้นมากใน chain
+- Exports: **named only** — `export function`, `export const`, `export { }` ไม่มี `export default`
+- Trailing commas: **always** — ทุก multi-line object/array/params
+- Brace style: **K&R** — `{` อยู่บรรทัดเดียวกัน
+- Variables: `const` เสมอ, `let` เมื่อต้อง reassign, ห้าม `var`
+- Null guard: เริ่มฟังก์ชันด้วย `if (!player?.isValid) return;`
+- Optional chaining: ใช้ `?.` และ `??` ตลอด
+- Section separator: `// =========================` ขึ้นต้นไฟล์ + แต่ละ section
+
+## Import conventions
+- Relative paths เสมอ: `from "../core/economyUtils"` ไม่ใช้ absolute path
+- Barrel exports: `config/index.js` re-export ทุก config → import จาก `"../config"`
+- Locale: `import { t } from "../ui/locale/index"` — ห้าม import `th.js` ตรง
+- Minecraft API: `import { world, system, Player } from "@minecraft/server"`
+- Module docs: ขึ้นต้นไฟล์ด้วย comment block อธิบายหน้าที่ของโมดูล
+
+## safeAsync pattern
+ทุกฟังก์ชัน async ที่เกี่ยวข้องกับ UI ต้องห่อด้วย `safeAsync()`:
+```js
+import { safeAsync } from "../core/asyncUtils";
+
+export const openMyMenu = safeAsync(async (player, opts) => {
+  if (!player?.isValid) return;
+  // ... logic
+});
+```
+**กฎเหล็ก:** ต้องปิดด้วย `});` เสมอ — ห้ามแค่ `}`
+ถ้าหาย `);` จะ error `SyntaxError: expecting ','` ตอน load ใน Minecraft
+`safeAsync` catch error ทั้งหมด + console.warn — ป้องกัน game crash
+
+## NavigationManager pattern
+```js
+import { NavigationManager } from "../ui/framework/NavigationManager";
+
+// ไปหน้าใหม่ (push current ลง stack)
+NavigationManager.push(player, () => openBuyMenu(player));
+
+// กลับหน้าก่อนหน้า (pop จาก stack)
+NavigationManager.back(player);
+
+// ปิดทั้งหมด (clear stack)
+NavigationManager.close(player);
+```
+**Flow ที่ถูกต้อง:**
+1. กดเลือกรายการ → `NavigationManager.push(player, () => openSubMenu(player))`
+2. กด "กลับ" → `NavigationManager.back(player)` (pop + วาดหน้าก่อนหน้าใหม่)
+3. กด "ออกเมนู" → `NavigationManager.close(player)` (clear stack ทั้งหมด)
+
+**ห้าม:** เรียก `openXxx()` โดยไม่ผ่าน NavigationManager — จะไม่มีปุ่ม "กลับ"
+
+## Config system
+ทุก config อยู่ใน `scripts/config/` — import จาก `config/index.js` (barrel):
+```js
+import { ECONOMY_CONFIG, SHOP_CONFIG } from "../config";
+```
+**โครงสร้าง config:**
+```js
+// config/economyConfig.js
+export const ECONOMY_CONFIG = {
+  TRANSFER: { COOLDOWN: 5, DISTANCE: 10, TAX_RATE: 0.05 },
+  HOME: { MAX_HOMES: 3 },
+};
+```
+**เพิ่ม config ใหม่:**
+1. เพิ่ม key ในไฟล์ config ที่เกี่ยวข้อง (เช่น `economyConfig.js`)
+2. ถ้าเป็น config ใหม่ทั้งไฟล์ → เพิ่ม export ใน `config/index.js`
+3. ห้าม hardcode ค่าในระบบ — ต้องอยู่ใน config เสมอ
+
+## Adding new features
+
+**เพิ่มไอเทมขาย:** เพิ่มใน `data/items.js` → `RAW_ITEMS`:
+```js
+"minecraft:new_item": {
+  sellPrice: 100,
+  category: "ore",        // ต้องตรงกับ id ใน data/shops.js
+  icon: "textures/items/new_item",
+},
+```
+
+**เพิ่มหมวดร้านค้า:** เพิ่มใน `data/shops.js` → `SHOP_CATEGORIES`:
+```js
+{ id: "newcat", labelKey: "category.newcat", icon: "textures/items/icon" },
+```
+
+**เพิ่มคำสั่งใหม่:** สร้างไฟล์ `commands/myCommands.js`:
+```js
+import { system } from "@minecraft/server";
+import { definePlayerCommand } from "../core/commandRegistry";
+
+definePlayerCommand({
+  name: "prakan:mycommand",
+  description: "คำอธิบาย",
+  execute(source) {
+    system.run(() => {
+      // UI ต้องอยู่ใน system.run()
+    });
+  },
+});
+```
+แล้วเพิ่ม 1 บรรทัดใน `commands/registerCommands.js`:
+```js
+import "./myCommands";
+```
+
+**เพิ่มเควส:** เพิ่มใน `data/quests.js` + locale key ใน `th.js`
+
+**เพิ่ม quest chain:** เพิ่มใน `data/questChains.js`
+**เพิ่ม achievement:** เพิ่มใน `data/questAchievements.js`
+
+## Thai locale system
+ทุก string แสดงผลผ่าน `t()` — ห้าม hardcode ภาษาไทยในโค้ด:
+```js
+import { t } from "../ui/locale/index";
+form.title(t("shop.buy.title"));
+form.body(t("shop.buy.balance", { balance: getMoney(player) }));
+```
+**เพิ่ม string ใหม่:** เพิ่มใน `ui/locale/th.js` (flat object, dotted keys):
+```js
+"mySystem.key": "ข้อความภาษาไทย",
+"mySystem.greeting": "สวัสดี {name}",
+```
+**Key naming:** `prefix.feature.detail` (เช่น `shop.buy.title`, `quest.chain.detail`)
+**Placeholders:** ใช้ `{name}` ใน string → `t("key", { name: "value" })`
+**Minecraft formatting:** ใส่ `§a`, `§c`, `§7` ฯลฯ ใน string ได้เลย
+
+## Debugging
+**ดู log:** Minecraft Output Log (ไม่ใช่ chat) — ค้นหา `[SystemName]`
+**Common errors:**
+| Error | สาเหตุ |
+|---|---|
+| `SyntaxError: expecting ','` | หาย `);` ปิด `safeAsync()` |
+| `[locale] Missing key:` | typo ใน key หรือไม่มีใน `th.js` |
+| `[Commands] FAILED to register` | command registration error |
+| `[async] error:` | safeAsync catch error — ดู stack trace ใน console |
+| Version mismatch | ลืม `npm run version:sync` |
+
+**ทดสอบ:**
+1. `node --check <file>` — เช็ค syntax (เชื่อถือได้กว่า lint)
+2. `npm run lint` — โหลดทุกไฟล์
+3. `npm run version:sync && npm run build` — build .mcpack
+4. Import .mcpack ใน Minecraft → เช็ค Output Log
+
 ## Key conventions
 - `scripts/core/constants.js` — shared constants used by2+ modules only (ADMIN_TAG, BANK_KEY, etc.)
 - `scripts/config/buildConfig.js` — `ADMIN_FEATURES_ENABLED` must stay `true` in source (no-admin is only in build output)
