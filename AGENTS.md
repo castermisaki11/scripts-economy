@@ -229,6 +229,44 @@ form.body(t("shop.buy.balance", { balance: getMoney(player) }));
 3. `npm run version:sync && npm run build` — build .mcpack
 4. Import .mcpack ใน Minecraft → เช็ค Output Log
 
+## Database system
+Persistence ผ่าน `database/Database.js` — auto-save ทุก 5 วินาที:
+```js
+import { Database } from "../database/Database";
+
+// อ่าน
+const money = Database.get(player, "money") ?? 0;
+
+// เขียน
+Database.set(player, "money", newAmount);
+
+// อ่าน-แก้-เขียน (atomic)
+Database.update(player, "money", (old) => old + delta);
+```
+**Key ที่ใช้จริง:** `"money"`, `"rpg:level"`, `"rpg:exp"`, `"rpg:points"`, `"rpg:strAtk"`, `"rpg:class"`, `"buffManagerState"`, `"tpDisabled"`, `"affinity:data"`
+**เพิ่ม data ใหม่:** เรียก `Database.set(player, "yourKey", value)` ได้เลย — ไม่ต้องแก้ schema
+
+## Systems overview
+| System | File | หน้าที่ |
+|---|---|---|
+| Economy | `systems/economy.js` | โอนเงินระหว่างผู้เล่น + ภาษี |
+| Shop | `systems/shopSystem.js` | ซื้อ/ขายไอเทม |
+| ShopEffect | `systems/shopEffect.js` | ซื้อ potion effects (buffManager) |
+| Job | `systems/jobSystem.js` | อาชีพ (mine/chop/kill) + รางวัล |
+| Quest | `systems/questSystem.js` | เควส daily/weekly/chain/achievement |
+| Market | `systems/playerMarket.js` | ตลาดผู้เล่น (ซื้อ/ขายระหว่างกัน) |
+| TP Bank | `systems/tpBankSystem.js` | ขอ teleport ระหว่างผู้เล่น |
+| Home | `systems/homeSystem.js` | จุด teleport ส่วนตัว |
+| Stat | `systems/statSystem.js` | จัดสรร stat points (STR/AGI/VIT) |
+| Level | `systems/playerLevel.js` | EXP → Level-up + stat points |
+| Combat | `systems/combatAttributes.js` | Damage formula |
+| Affinity | `systems/affinitySystem.js` | Weapon/armor mastery |
+| AutoCollect | `systems/autoCollect.js` | Auto-collect drops + XP vacuum |
+| Scoreboard | `systems/scoreboard.js` | Leaderboard display |
+
+**เพิ่ม EXP จากแหล่งใหม่:** เรียก `addPlayerExp(player, amount)` จาก `playerLevel.js`
+**ให้ potion effect:** เรียก `grantBuff(player, effectId, level, durationTicks, sourceId)` จาก `buffManager.js`
+
 ## Key conventions
 - `scripts/core/constants.js` — shared constants used by2+ modules only (ADMIN_TAG, BANK_KEY, etc.)
 - `scripts/config/buildConfig.js` — `ADMIN_FEATURES_ENABLED` must stay `true` in source (no-admin is only in build output)
