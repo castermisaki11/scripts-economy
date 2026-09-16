@@ -158,7 +158,7 @@ export const createListMenu = safeAsync(async (player, opts) => {
 
   // กันไว้เฉย ๆ ไม่ควรมาถึงจุดนี้ได้ (ปุ่มทั้งหมดถูกจัดการครบแล้วด้านบน)
   return NavigationManager.back(player);
-}
+});
 
 /* =========================
    CONFIRM DIALOG
@@ -192,7 +192,7 @@ export const createResultMessage = safeAsync(async (player, opts) => {
     .button(t("ui.ok"));
 
   await form.show(player).catch(() => {});
-}
+});
 
 /* =========================
    MODAL HELPER (ยังไม่อยู่ในสเปกเดิม แต่ทุกไฟล์ที่ migrate จะต้องใช้
@@ -224,7 +224,7 @@ export const createAmountPrompt = safeAsync(async (player, opts) => {
   }
 
   return onSubmit(res.formValues[0]);
-}
+});
 
 /* =========================
    TOGGLES PROMPT (เพิ่มสำหรับ autoCollect.js — ModalFormData แบบ
@@ -256,7 +256,7 @@ export const createTogglesPrompt = safeAsync(async (player, opts) => {
   }
 
   return onSubmit(res.formValues);
-}
+});
 
 /* =========================
    MIXED MODAL PROMPT (เพิ่มสำหรับ adminUi.js — ฟอร์มที่มีฟิลด์ผสมกัน
@@ -312,4 +312,4 @@ export const createModalPrompt = safeAsync(async (player, opts) => {
   }
 
   return onSubmit(res.formValues);
-}
+});
