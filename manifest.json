@@ -4,7 +4,11 @@
     "description": "Economy addon by PRAKAN — เศรษฐกิจ อาชีพ ร้านค้า ตลาด เควส ครบในแอดออนเดียว",
     "name": "Scripts economy",
     "uuid": "73044226-4abc-425f-bf3f-da910bcc7b8d",
-"version": [1, 6, 2],
+    "version": [
+      1,
+      6,
+      2
+    ],
     "min_engine_version": [
       1,
       26,
@@ -16,12 +20,20 @@
       "description": "Data module — dynamic properties ของทุกระบบ (เงิน, อาชีพ, เควส ฯลฯ)",
       "type": "data",
       "uuid": "baadaea7-cda6-4262-91ef-46f661b07683",
-      "version": [1, 4, 43]
+      "version": [
+        1,
+        4,
+        43
+      ]
     },
     {
       "type": "script",
       "uuid": "ed0fe5eb-b9d5-4ca9-b610-93902395f750",
-    "version": [1, 4, 43],
+      "version": [
+        1,
+        4,
+        43
+      ],
       "entry": "scripts/index.js",
       "language": "javascript"
     }

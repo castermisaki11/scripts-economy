@@ -1,0 +1,15 @@
+{
+  "name": "scripts-economy",
+  "version": "1.6.2",
+  "description": "Minecraft Bedrock Economy Addon — เศรษฐกิจ อาชีพ ร้านค้า ตลาด เควส",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "version:sync": "node tools/bump-version.mjs",
+    "build": "node tools/build-mcpack.mjs",
+    "lint": "node -e \"(async()=>{const fs=require('fs'),path=require('path');const base=path.resolve('scripts');fs.readdirSync(base).forEach(f=>{if(f.endsWith('.js')){const p=path.join(base,f);import(p).then(()=>console.log('loaded',f)).catch(e=>{console.error('error loading',f,e.message);process.exit(1);});}});})();\""
+  },
+  "devDependencies": {
+    "archiver": "^8.0.0"
+  }
+}
