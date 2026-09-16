@@ -145,7 +145,7 @@ export const openTransferUI = safeAsync(async (player) => {
       return openAmountUI(player, target);
     }
   });
-}
+});
 
 /* =========================
    AMOUNT / CONFIRM
@@ -172,7 +172,7 @@ export const openAmountUI = safeAsync(async (sender, target) => {
       return openConfirmUI(sender, target, amount);
     }
   });
-}
+});
 
 export const openConfirmUI = safeAsync(async (sender, target, amount) => {
   const tax = Math.floor(amount * getTaxRate());
@@ -189,7 +189,7 @@ export const openConfirmUI = safeAsync(async (sender, target, amount) => {
     onCancel: () => NavigationManager.back(sender),
     onConfirm: () => executeTransfer(sender, target, amount)
   });
-}
+});
 
 /* =========================
    EXECUTE TRANSFER
@@ -324,7 +324,7 @@ async export const openAdminTransferUI = safeAsync(async (admin) => {
       return openAdminAmountUI(admin, target);
     }
   });
-}
+});
 
 function openAdminAmountUI(admin, target) {
   return createAmountPrompt(admin, {
@@ -406,7 +406,7 @@ export const openLogUI = safeAsync(async (admin) => {
     bodyVars: { text },
     items: []
   });
-}
+});
 
 /* =========================
    SEARCH LOG BY NAME
@@ -457,7 +457,7 @@ export const showSearchResult = safeAsync(async (admin, name) => {
     bodyVars: { text },
     items: []
   });
-}
+});
 
 /* =========================
    LOG FORMAT

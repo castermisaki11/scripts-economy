@@ -68,7 +68,7 @@ export const openAchievementsUI = safeAsync(async (player) => {
       return openAchievementGroupUI(player, item.id);
     }
   });
-}
+});
 
 export const openAchievementGroupUI = safeAsync(async (player, statKey) => {
   if (!player?.isValid) return;
@@ -120,4 +120,4 @@ export const openAchievementGroupUI = safeAsync(async (player, statKey) => {
       // เกิดอะไร (framework ต้องการ onSelect เสมอ จึงว่างไว้)
     }
   });
-}
+});

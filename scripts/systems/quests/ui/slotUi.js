@@ -107,15 +107,15 @@ export const openSlotListUI = safeAsync(async (player, category) => {
       return openQuestSlotDetailUI(player, category, item.id);
     }
   });
-}
+});
 
 export const openDailyQuestUI = safeAsync(async (player) => {
   return openSlotListUI(player, "daily");
-}
+});
 
 export const openWeeklyQuestUI = safeAsync(async (player) => {
   return openSlotListUI(player, "weekly");
-}
+});
 
 /* =========================
    UI: Daily / Weekly — รายละเอียดเควสในช่อง (Quest Detail Screen)
@@ -180,7 +180,7 @@ export const openQuestSlotDetailUI = safeAsync(async (player, category, slotInde
       }
     }
   });
-}
+});
 
 /* =========================
    REROLL (Daily / Weekly Slot) — UI ที่เรียก rerollDailySlot()/

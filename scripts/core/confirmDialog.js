@@ -57,7 +57,7 @@ export const showConfirm = safeAsync(async (opts) => {
 
   NavigationManager.logEvent(player, "dialog-confirmed", titleKey);
   return onConfirm();
-}
+});
 
 /* =========================
    ICON CONFIRM DIALOG
@@ -109,4 +109,4 @@ export const showIconConfirm = safeAsync(async (opts) => {
 
   NavigationManager.logEvent(player, "dialog-confirmed", titleKey);
   return onConfirm();
-}
+});

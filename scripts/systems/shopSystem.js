@@ -132,7 +132,7 @@ export const openSellMenu = safeAsync(async (player) => {
       return openSellItemMenu(player, item.id);
     }
   });
-}
+});
 
 // =========================
 // ขายทั้งหมดในกระเป๋า (ทุกไอเทมที่ขายได้ในคลัง — ไม่ใช่แค่ชนิดเดียว)
@@ -182,7 +182,7 @@ export const openSellAllConfirm = safeAsync(async (player, ids) => {
     },
     onConfirm: () => sellAllInventory(player, ids)
   });
-}
+});
 
 function sellAllInventory(player, ids) {
   let totalEarned = 0;
@@ -256,7 +256,7 @@ export const openSellItemMenu = safeAsync(async (player, itemId) => {
       return openSellCustomAmount(player, itemId, owned);
     }
   });
-}
+});
 
 export const openSellCustomAmount = safeAsync(async (player, itemId, owned) => {
   return createAmountPrompt(player, {
@@ -283,7 +283,7 @@ export const openSellCustomAmount = safeAsync(async (player, itemId, owned) => {
       return openSellConfirm(player, itemId, amount);
     }
   });
-}
+});
 
 // =========================
 // ยืนยันการขาย
@@ -304,7 +304,7 @@ export const openSellConfirm = safeAsync(async (player, itemId, amount) => {
     },
     onConfirm: () => sellItems(player, itemId, amount)
   });
-}
+});
 
 function sellItems(player, itemId, amount) {
   const removed = removeItems(player, itemId, amount);
@@ -379,7 +379,7 @@ export const openBuyCategoryPicker = safeAsync(async (player) => {
       return openBuyMenu(player, item.id);
     }
   });
-}
+});
 
 function getCachedBuyPrices(){
   const cached = Cache.get(CACHE_SHOP_PRICES);
@@ -470,7 +470,7 @@ export const openBuyMenu = safeAsync(async (player, category) => {
       return openBuyItemMenu(player, item.id, category);
     }
   });
-}
+});
 
 // =========================
 // ปลดล็อคร้านค้า — จ่าย sellPrice × 5 เพื่อปลดล็อคไอเทม
@@ -488,7 +488,7 @@ export const openUnlockConfirm = safeAsync(async (player, itemId, unlockCost) =>
     },
     onConfirm: () => executeUnlock(player, itemId, unlockCost)
   });
-}
+});
 
 function executeUnlock(player, itemId, unlockCost) {
   const money = getMoney(player);
@@ -547,7 +547,7 @@ export const openBuyItemMenu = safeAsync(async (player, itemId, category) => {
       return openBuyConfirm(player, itemId, item.id, category);
     }
   });
-}
+});
 
 export const openBuyCustomAmount = safeAsync(async (player, itemId, category) => {
   return createAmountPrompt(player, {
@@ -570,7 +570,7 @@ export const openBuyCustomAmount = safeAsync(async (player, itemId, category) =>
       return openBuyConfirm(player, itemId, amount, category);
     }
   });
-}
+});
 
 // =========================
 // ยืนยันการซื้อ
@@ -591,7 +591,7 @@ export const openBuyConfirm = safeAsync(async (player, itemId, amount, category)
     },
     onConfirm: () => buyItems(player, itemId, amount, category)
   });
-}
+});
 
 function buyItems(player, itemId, amount, category) {
   const price = getCachedBuyPrice(itemId);

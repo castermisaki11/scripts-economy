@@ -147,7 +147,7 @@ export const openMarketUI = safeAsync(async (player) => {
             if (item.id === "claimItems") return claimPendingItems(player);
         }
     });
-}
+});
 
 // --- ตลาด: รายการสินค้า + ค้นหา ---
 
@@ -208,7 +208,7 @@ export const showMarketList = safeAsync(async (player, query = "", sortMode = "n
             return confirmPurchase(player, selected);
         }
     });
-}
+});
 
 export const openMarketSearch = safeAsync(async (player, previousQuery = "", sortMode = "newest") => {
     return createAmountPrompt(player, {
@@ -220,7 +220,7 @@ export const openMarketSearch = safeAsync(async (player, previousQuery = "", sor
         onCancel: () => showMarketList(player, previousQuery, sortMode),
         onSubmit: (value) => showMarketList(player, String(value ?? "").trim(), sortMode)
     });
-}
+});
 
 // เมนูเลือกลำดับการแสดงผล — modal ชั่วคราวเหมือน openMarketSearch ข้างบน
 // ไม่ push เข้าสแตก (กด X/ยกเลิก ก็แค่วาด showMarketList เดิมใหม่)
@@ -243,7 +243,7 @@ export const openSortMenu = safeAsync(async (player, query, currentSort) => {
             return showMarketList(player, query, selected.id);
         }
     });
-}
+});
 
 // --- ระบบการซื้อ (จุดที่หักภาษีไปเข้า Bank) ---
 export const confirmPurchase = safeAsync(async (player, itemData) => {
@@ -324,7 +324,7 @@ export const confirmPurchase = safeAsync(async (player, itemData) => {
             }
         }
     });
-}
+});
 
 // --- ฟังก์ชันเสริมสำหรับ Admin (ใช้ดูหรือเบิกเงินธนาคาร) ---
 export const adminBankUI = safeAsync(async (player) => {
@@ -359,7 +359,7 @@ export const adminBankUI = safeAsync(async (player) => {
             return NavigationManager.close(player);
         }
     });
-}
+});
 
 // --- ลงขายสินค้า ---
 export const showInventorySell = safeAsync(async (player) => {
@@ -397,7 +397,7 @@ export const showInventorySell = safeAsync(async (player) => {
             return showPriceInput(player, info);
         }
     });
-}
+});
 
 export const showPriceInput = safeAsync(async (player, itemInfo) => {
     return createModalPrompt(player, {
@@ -463,7 +463,7 @@ export const showPriceInput = safeAsync(async (player, itemInfo) => {
             return NavigationManager.close(player);
         }
     });
-}
+});
 
 // เมนูจัดการ listing ของตัวเอง (แทนที่การพาไปหน้ายกเลิกตรง ๆ) — เลือกได้ว่า
 // จะแก้ราคา (ไม่ต้องถอนของออกจากตลาด) หรือยกเลิกการขาย (showCancelForm เดิม)
@@ -488,7 +488,7 @@ export const showOwnListingMenu = safeAsync(async (player, itemData) => {
             }
         }
     });
-}
+});
 
 // แก้ราคาของ listing ที่ยังลงขายอยู่ โดยไม่ต้องยกเลิก+ลงขายใหม่ทั้งหมด —
 // ใช้ MAX_LISTING_PRICE เดียวกับตอนลงขายครั้งแรก (showPriceInput)
@@ -526,7 +526,7 @@ export const showEditPriceForm = safeAsync(async (player, itemData) => {
             return NavigationManager.close(player);
         }
     });
-}
+});
 
 export const showCancelForm = safeAsync(async (player, itemData) => {
     return showConfirm({
@@ -551,7 +551,7 @@ export const showCancelForm = safeAsync(async (player, itemData) => {
             return NavigationManager.close(player);
         }
     });
-}
+});
 
 // --- ระบบติดตามไอเทม: หน้าจอ ---
 
@@ -587,7 +587,7 @@ export const showWatchlist = safeAsync(async (player) => {
             return showRemoveWatchConfirm(player, target);
         }
     });
-}
+});
 
 // เพิ่มคำค้นหาใหม่เข้า watchlist — ใช้ตัวเทียบ query เดียวกับตอนค้นหาในตลาด
 // (searchItems) กันไม่ให้พฤติกรรม "ตรงกัน" ต่างจากตอนค้นหาจริง
@@ -622,7 +622,7 @@ export const showAddWatchlist = safeAsync(async (player) => {
             return NavigationManager.close(player);
         }
     });
-}
+});
 
 // เลิกติดตามคำค้นหาที่เลือก
 export const showRemoveWatchConfirm = safeAsync(async (player, target) => {
@@ -640,7 +640,7 @@ export const showRemoveWatchConfirm = safeAsync(async (player, target) => {
             return NavigationManager.close(player);
         }
     });
-}
+});
 
 // รายการแจ้งเตือนที่ค้างไว้ (จากตอนออฟไลน์ หรือพลาดข้อความแชทตอนออนไลน์) —
 // ล้างคิวทันทีที่เปิดหน้านี้ (อ่านครั้งเดียวถือว่ารับทราบแล้ว เหมือน inbox
@@ -663,4 +663,4 @@ export const showWatchAlerts = safeAsync(async (player) => {
         // แค่รายการอ่านอย่างเดียว — แตะอันไหนก็ปิดเมนูเหมือนกัน ไม่มีหน้าถัดไป
         onSelect: () => NavigationManager.close(player)
     });
-}
+});

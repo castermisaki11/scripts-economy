@@ -71,7 +71,7 @@ export const openMoneyScoreboardUI = safeAsync(async (player) => {
       openBoard(player, cat);
     },
   });
-}
+});
 
 /* =========================
    หน้ากระดานรายหมวด (Top 10 + อันดับตัวเอง)
@@ -116,4 +116,4 @@ export const openBoard = safeAsync(async (player, category) => {
     // ปุ่มอันดับไม่มี action ย่อย — กดแล้วแค่เปิดหน้าเดิมซ้ำเฉย ๆ
     onSelect: () => openBoard(player, category),
   });
-}
+});

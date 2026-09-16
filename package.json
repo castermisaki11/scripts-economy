@@ -1,6 +1,6 @@
 {
   "name": "scripts-economy",
-  "version": "1.6.2",
+  "version": "1.6.3",
   "description": "Minecraft Bedrock Economy Addon — เศรษฐกิจ อาชีพ ร้านค้า ตลาด เควส",
   "private": true,
   "type": "module",

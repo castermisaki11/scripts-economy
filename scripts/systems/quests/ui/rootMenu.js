@@ -77,4 +77,4 @@ export const openQuestUI = safeAsync(async (player) => {
       }
     }
   });
-}
+});

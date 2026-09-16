@@ -128,4 +128,4 @@ export const openBountyQuestUI = safeAsync(async (player) => {
       }
     }
   });
-}
+});

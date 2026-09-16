@@ -96,7 +96,7 @@ export const openChainsUI = safeAsync(async (player) => {
       return openChainDetailUI(player, item.id);
     }
   });
-}
+});
 
 /* =========================
    CHAIN DETAIL
@@ -195,7 +195,7 @@ export const openChainDetailUI = safeAsync(async (player, chainId) => {
       // กดรายการด่าน = ไม่มี action (ข้อมูลอ่านอย่างเดียว)
     }
   });
-}
+});
 
 /* =========================
    START / ABANDON (UI wrappers ของ chains.js engine)

@@ -459,7 +459,7 @@ export const openJobUI = safeAsync(async (player) => {
       }
     }
   });
-}
+});
 
 /* =========================
    UI: เลือก/เปลี่ยนอาชีพ
@@ -539,7 +539,7 @@ export const openJobSelectUI = safeAsync(async (player) => {
       });
     }
   });
-}
+});
 
 function executeJobChange(player, data, targetJob, fee) {
   if (fee > 0) {
@@ -586,7 +586,7 @@ export const openJobRewardsPickerUI = safeAsync(async (player) => {
       return openJobRewardsUI(player, item.id);
     }
   });
-}
+});
 
 export const openJobRewardsUI = safeAsync(async (player, jobId) => {
   if (!player?.isValid) return;
@@ -621,7 +621,7 @@ export const openJobRewardsUI = safeAsync(async (player, jobId) => {
     bodyVars: { text },
     items: []
   });
-}
+});
 
 /* =========================
    PHASE 2: JOB <-> QUEST BRIDGE REGISTRATION

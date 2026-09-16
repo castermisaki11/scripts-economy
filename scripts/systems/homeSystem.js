@@ -142,7 +142,7 @@ export const cancelHomeChannel = safeAsync(async (player, reasonMessageKey) => {
     showError(player, t(reasonMessageKey));
     player.playSound("note.bass");
   }
-}
+});
 
 // ใช้เช็คว่าผู้เล่นกำลังนับถอยหลังรอวาปบ้านอยู่ไหม (เช่นกันสั่ง
 // /prakan:home ซ้อนระหว่างรอ)
@@ -483,7 +483,7 @@ export const openHomeUI = safeAsync(async (player) => {
       return openHomeDetailUI(player, name);
     }
   });
-}
+});
 
 // หน้าตั้งบ้านใหม่ — ถามชื่อผ่าน text prompt (เว้นว่างได้ = ใช้ชื่อ default
 // "home" เหมือน /prakan:sethome ไม่ใส่พารามิเตอร์)

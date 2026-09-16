@@ -90,7 +90,7 @@ export const openShopMenu = safeAsync(async (player) => {
             return openPresetMenu(player, cfg);
         }
     });
-}
+});
 
 export const openPresetMenu = safeAsync(async (player, cfg) => {
     if (!player?.isValid) return;
@@ -156,7 +156,7 @@ export const openPresetMenu = safeAsync(async (player, cfg) => {
             return openEffectConfirm(player, cfg, pick);
         }
     });
-}
+});
 
 // =========================
 // ยืนยันการซื้อเอฟเฟกต์
@@ -195,7 +195,7 @@ export const openEffectConfirm = safeAsync(async (player, cfg, pick) => {
             return NavigationManager.back(player);
         }
     });
-}
+});
 
 function roman(n) {
     const map = {

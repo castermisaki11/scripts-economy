@@ -193,7 +193,7 @@ export const cancelChannel = safeAsync(async (sender, reasonMessageKey, notifyTa
     const target = findOnlinePlayerById(channel.targetId);
     if (target?.isValid) showInfo(target, t(notifyTargetKey, { sender: sender.name ?? "?" }));
   }
-}
+});
 
 // โดนโจมตี = ยกเลิก channel ทันที (ลงทะเบียนครั้งเดียวตอนโหลดโมดูล ไม่ผูก
 // กับ channel ใดโดยเฉพาะ — เช็คจาก activeChannels ว่าผู้ที่โดนตีกำลัง
@@ -360,7 +360,7 @@ export const openTpUI = safeAsync(async (player) => {
       return openTpConfirmUI(player, target);
     }
   });
-}
+});
 
 /* =========================
    TOGGLE TP RECEIVE
@@ -443,7 +443,7 @@ export const openTpConfirmUI = safeAsync(async (sender, target) => {
       return sendTpRequest(sender, target, total);
     }
   });
-}
+});
 
 /* =========================
    SEND REQUEST
@@ -513,7 +513,7 @@ export const openReceiveUI = safeAsync(async (target) => {
     onCancel: () => rejectTp(target),
     onConfirm: () => acceptTp(target)
   });
-}
+});
 
 function rejectTp(target) {
   const req = tpRequests.get(target.id);

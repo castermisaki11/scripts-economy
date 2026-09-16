@@ -48,4 +48,4 @@ export const MENU_BOOK_NAME_TAG = "ZEN";
  *  ต้อง bump พร้อมกันทั้ง 3 ไฟล์ทุกครั้ง: manifest.json (header + modules),
  *  package.json และไฟล์นี้ (Bedrock scripting import manifest.json ตรง ๆ
  *  ไม่ได้ จึงต้อง hardcode ไว้ในสคริปต์) */
-export const ADDON_VERSION = "1.6.2";
+export const ADDON_VERSION = "1.6.3";
